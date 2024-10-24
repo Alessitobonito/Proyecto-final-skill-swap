@@ -1,12 +1,18 @@
+// src/components/Menu.jsx
+import React from 'react';
 import { Link } from 'react-router-dom';
 
-const Menu = () => (
-  <aside className="w-64 bg-gray-100 h-full p-4">
-    <ul>
-      <li><Link to="/app/skills" className="block py-2">Skill List</Link></li>
-      <li><Link to="/app/skills/new" className="block py-2">Add Skill</Link></li>
-    </ul>
-  </aside>
-);
+const Menu = () => {
+  return (
+    <nav className="bg-gray-100 p-4">
+      <div className="container mx-auto">
+        <ul className="flex justify-center space-x-6">
+          <li><Link to="/app/skills" className="hover:text-blue-600">Browse Skills</Link></li>
+          <li><Link to="/app/skills/new" className="hover:text-blue-600">Offer a Skill</Link></li>
+        </ul>
+      </div>
+    </nav>
+  );
+};
 
 export default Menu;
