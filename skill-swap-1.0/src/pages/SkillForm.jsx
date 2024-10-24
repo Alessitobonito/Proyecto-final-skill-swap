@@ -5,7 +5,7 @@ import { auth } from '../firebase';
 
 const SkillForm = () => {
   const { id } = useParams();
-  const [skill, setSkill] = useState({ name: '', description: '', level: '', category: '' });
+  const [skill, setSkill] = useState({ name: '', description: '', level: 'beginner', category: '' });
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
 
@@ -68,14 +68,17 @@ const SkillForm = () => {
       </div>
       <div className="mb-4">
         <label className="block text-gray-700 mb-2" htmlFor="level">Level</label>
-        <input
-          type="text"
+        <select
           name="level"
           value={skill.level}
           onChange={handleChange}
           className="w-full px-4 py-2 border rounded"
           id="level"
-        />
+        >
+          <option value="beginner">Beginner</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="advanced">Advanced</option>
+        </select>
       </div>
       <div className="mb-4">
         <label className="block text-gray-700 mb-2" htmlFor="category">Category</label>
