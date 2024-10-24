@@ -1,21 +1,31 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getSkill, saveSkill } from '../services/api';
+import { auth } from '../firebase';
 
 const SkillForm = () => {
   const { id } = useParams();
   const [skill, setSkill] = useState({ name: '', description: '', level: '', category: '' });
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    if (id) {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUser(user);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (id && user) {
       const fetchSkill = async () => {
-        const data = await getSkill(id);
+        const data = await getSkill(id, user.uid);
         setSkill(data);
       };
       fetchSkill();
     }
-  }, [id]);
+  }, [id, user]);
 
   const handleChange = (e) => {
     setSkill({ ...skill, [e.target.name]: e.target.value });
@@ -23,10 +33,14 @@ const SkillForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await saveSkill(skill);
-    navigate('/app/skills');
+    if (user) {
+      await saveSkill(skill, user.uid);
+      navigate('/app/skills');
+    } else {
+      console.log('User not authenticated');
+    }
   };
-
+  
   return (
     <form onSubmit={handleSubmit}>
       <h2 className="text-2xl mb-4">{id ? 'Edit Skill' : 'Add Skill'}</h2>
