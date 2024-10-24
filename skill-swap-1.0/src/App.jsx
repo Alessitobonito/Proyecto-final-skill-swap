@@ -6,14 +6,14 @@ import HomePage from './pages/HomePage';
 import SkillList from './pages/SkillList';
 import SkillForm from './pages/SkillForm';
 import ProtectedRoute from './components/ProtectedRoute';
-import PublicPage from './pages/WelcomePage';
+import WelcomePage from './pages/WelcomePage';
 import Layout from './components/Layout';
 
 function App() {
   return (
     <Layout>
       <Routes>
-        <Route path="/" element={<PublicPage />} />
+        <Route path="/" element={<WelcomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/app" element={<ProtectedRoute />}>
