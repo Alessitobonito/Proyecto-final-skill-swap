@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
+import Swal from 'sweetalert2';
 
 const AuthContext = createContext();
 
@@ -9,13 +10,30 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
+  const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+  });
+
   const login = async (email, password) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       setUser(userCredential.user);
+      Toast.fire({
+        icon: 'success',
+        title: 'Signed in successfully'
+      });
       navigate('/app');
     } catch (error) {
-      console.error("Error en el inicio de sesión:", error.message);
+      console.error("Login error:", error.message);
+      await Swal.fire({
+        icon: 'error',
+        title: 'Login Failed',
+        text: 'Invalid email or password.',
+      });
       throw error;
     }
   };
@@ -24,9 +42,18 @@ export const AuthProvider = ({ children }) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       setUser(userCredential.user);
+      Toast.fire({
+        icon: 'success',
+        title: 'Account created successfully'
+      });
       navigate('/app');
     } catch (error) {
-      console.error("Error en el registro:", error.message);
+      console.error("Registration error:", error.message);
+      await Swal.fire({
+        icon: 'error',
+        title: 'Registration Failed',
+        text: error.message,
+      });
       throw error;
     }
   };
@@ -35,9 +62,18 @@ export const AuthProvider = ({ children }) => {
     try {
       await signOut(auth);
       setUser(null);
+      Toast.fire({
+        icon: 'success',
+        title: 'Logged out successfully'
+      });
       navigate('/login');
     } catch (error) {
-      console.error("Error al cerrar sesión:", error.message);
+      console.error("Logout error:", error.message);
+      await Swal.fire({
+        icon: 'error',
+        title: 'Logout Failed',
+        text: 'There was an error logging out.',
+      });
     }
   };
 

@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import Swal from 'sweetalert2';
 
 const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
   const { register } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await register(email, password);
+
     } catch (error) {
-      console.error("Error de registro:", error.message);
-      setErrorMessage(error.message);
+      console.error("Registration error:", error.message);
     }
   };
 
@@ -21,10 +21,9 @@ const Register = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Register</h2>
-        {errorMessage && <p className="text-red-500 text-center mb-4">{errorMessage}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label >
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
             <input
               type="email"
               id="email"
@@ -45,7 +44,10 @@ const Register = () => {
               required
             />
           </div>
-          <button type="submit" className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition duration-300">
+          <button 
+            type="submit" 
+            className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition duration-300"
+          >
             Register
           </button>
         </form>

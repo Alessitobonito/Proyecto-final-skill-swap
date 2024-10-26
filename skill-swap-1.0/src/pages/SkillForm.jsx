@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getSkill, saveSkill } from '../services/api';
 import { auth } from '../firebase';
+import Swal from 'sweetalert2';
 
 const SkillForm = () => {
   const { id } = useParams();
@@ -34,10 +35,35 @@ const SkillForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (user) {
-      await saveSkill(skill, user.uid);
-      navigate('/app/skills');
+      try {
+        await saveSkill(skill, user.uid);
+        
+        // Mostrar mensaje de éxito con SweetAlert2
+        await Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: 'Skill saved successfully!',
+          timer: 1500,
+          showConfirmButton: false
+        });
+        
+        navigate('/app/skills');
+      } catch (error) {
+        console.error('Error saving skill:', error);
+        
+        // Mostrar mensaje de error con SweetAlert2
+        await Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Error saving skill. Please try again.'
+        });
+      }
     } else {
-      console.log('User not authenticated');
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Authentication Required',
+        text: 'You must be authenticated to save skills.'
+      });
     }
   };
   

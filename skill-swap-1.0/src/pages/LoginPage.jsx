@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import Swal from 'sweetalert2';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
   const { login } = useAuth();
 
   const handleSubmit = async (e) => {
@@ -12,8 +12,8 @@ const LoginPage = () => {
     try {
       await login(email, password);
     } catch (error) {
-      console.error("Error de inicio de sesión:", error.message);
-      setErrorMessage(error.message);
+      console.error("Login error:", error.message);
+
     }
   };
 
@@ -21,7 +21,6 @@ const LoginPage = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Login</h2>
-        {errorMessage && <p className="text-red-500 text-center mb-4">{errorMessage}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
@@ -45,7 +44,10 @@ const LoginPage = () => {
               required
             />
           </div>
-          <button type="submit" className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition duration-300">
+          <button 
+            type="submit" 
+            className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition duration-300"
+          >
             Login
           </button>
         </form>
