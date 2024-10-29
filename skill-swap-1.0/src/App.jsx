@@ -15,6 +15,17 @@ Una vez que hayas terminado, asegúrate de que la aplicación esté lista para s
 Documentación del proyecto.
 
 Crea un archivo README.md que explique cómo instalar, ejecutar y usar tu aplicación. Incluye capturas de pantalla y ejemplos de uso.
+Página de detalles de habilidad
+Perfil de usuario
+Configuraciones de la cuenta
+Sistema de búsqueda y filtrado
+Sistema de calificaciones y reseñas
+Integración de redes sociales
+Notificaciones
+Sistema de mensajería
+Funcionalidad de emparejamiento
+Analíticas y métricas
+Página de administración
 */
 import { Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
@@ -25,6 +36,8 @@ import SkillForm from './pages/SkillForm';
 import ProtectedRoute from './components/ProtectedRoute';
 import WelcomePage from './pages/WelcomePage';
 import Layout from './components/Layout';
+import SkillDetails from './pages/SkillDetails';
+import UserProfile from './pages/UserProfile';
 
 function App() {
   return (
@@ -38,6 +51,8 @@ function App() {
           <Route path="skills" element={<SkillList />} />
           <Route path="skills/new" element={<SkillForm />} />
           <Route path="skills/edit/:id" element={<SkillForm />} />
+          <Route path="skills/:id" element={<SkillDetails />} />
+          <Route path="profile" element={<UserProfile />} />
         </Route>
       </Routes>
     </Layout>

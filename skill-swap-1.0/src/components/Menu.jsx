@@ -9,6 +9,7 @@ const Menu = () => {
         <ul className="flex justify-center space-x-6">
           <li><Link to="/app/skills" className="hover:text-blue-600">Browse Skills</Link></li>
           <li><Link to="/app/skills/new" className="hover:text-blue-600">Offer a Skill</Link></li>
+          <li><Link to="/app/profile" className="hover:text-blue-600">My Profile</Link></li>
         </ul>
       </div>
     </nav>

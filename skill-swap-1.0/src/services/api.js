@@ -22,13 +22,13 @@ export const getSkill = async (id, userId) => {
 
 export const addSkill = async (skillData, userId) => {
   const skillsCollection = collection(db, SKILLS_COLLECTION);
-  const docRef = await addDoc(skillsCollection, { ...skillData, userId });
+  const docRef = await addDoc(skillsCollection, { ...skillData, userId, imageUrl: skillData.imageUrl || null });
   return { id: docRef.id, ...skillData, userId };
 };
 
 export const updateSkill = async (id, skillData, userId) => {
   const skillDoc = doc(db, SKILLS_COLLECTION, id);
-  await updateDoc(skillDoc, { ...skillData, userId });
+  await updateDoc(skillDoc, { ...skillData, userId, imageUrl: skillData.imageUrl || null });
   return { id, ...skillData, userId };
 };
 
@@ -37,11 +37,22 @@ export const deleteSkill = async (id) => {
   await deleteDoc(skillDoc);
 };
 
-// Función combinada para guardar (añadir o actualizar) una habilidad
 export const saveSkill = async (skill, userId) => {
   if (skill.id) {
     return updateSkill(skill.id, skill, userId);
   } else {
     return addSkill(skill, userId);
   }
+};
+
+export const getUserProfile = async (userId) => {
+  const docRef = doc(db, 'userProfiles', userId);
+  const docSnap = await getDoc(docRef);
+  return docSnap.exists() ? docSnap.data() : null;
+};
+
+export const updateUserProfile = async (userId, profileData) => {
+  const docRef = doc(db, 'userProfiles', userId);
+  await setDoc(docRef, profileData, { merge: true });
+  return profileData;
 };

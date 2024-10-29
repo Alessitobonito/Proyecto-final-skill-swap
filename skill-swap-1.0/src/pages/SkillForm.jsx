@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getSkill, saveSkill } from '../services/api';
-import { auth } from '../firebase';
+import { auth, storage } from '../firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import Swal from 'sweetalert2';
 
 const SkillForm = () => {
   const { id } = useParams();
-  const [skill, setSkill] = useState({ name: '', description: '', level: 'beginner', category: '' });
+  const [skill, setSkill] = useState({ name: '', description: '', level: 'beginner', category: '', imageUrl: '' });
+  const [file, setFile] = useState(null);
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
 
@@ -32,13 +34,26 @@ const SkillForm = () => {
     setSkill({ ...skill, [e.target.name]: e.target.value });
   };
 
+  const handleFileChange = (e) => {
+    if (e.target.files[0]) {
+      setFile(e.target.files[0]);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (user) {
       try {
-        await saveSkill(skill, user.uid);
+        let imageUrl = skill.imageUrl;
+        if (file) {
+          const storageRef = ref(storage, `skill-images/${user.uid}/${file.name}`);
+          await uploadBytes(storageRef, file);
+          imageUrl = await getDownloadURL(storageRef);
+        }
+
+        const updatedSkill = { ...skill, imageUrl };
+        await saveSkill(updatedSkill, user.uid);
         
-        // Mostrar mensaje de éxito con SweetAlert2
         await Swal.fire({
           icon: 'success',
           title: 'Success!',
@@ -49,9 +64,6 @@ const SkillForm = () => {
         
         navigate('/app/skills');
       } catch (error) {
-        console.error('Error saving skill:', error);
-        
-        // Mostrar mensaje de error con SweetAlert2
         await Swal.fire({
           icon: 'error',
           title: 'Oops...',
@@ -115,6 +127,15 @@ const SkillForm = () => {
           onChange={handleChange}
           className="w-full px-4 py-2 border rounded"
           id="category"
+        />
+      </div>
+      <div className="mb-4">
+        <label className="block text-gray-700 mb-2" htmlFor="image">Image</label>
+        <input
+          type="file"
+          onChange={handleFileChange}
+          className="w-full px-4 py-2 border rounded"
+          id="image"
         />
       </div>
       <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">Save</button>

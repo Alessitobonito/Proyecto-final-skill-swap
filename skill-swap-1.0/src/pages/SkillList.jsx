@@ -81,6 +81,9 @@ const SkillList = () => {
             key={skill.id}
             className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
           >
+            {skill.imageUrl && (
+              <img src={skill.imageUrl} alt={skill.name} className="w-full h-48 object-cover" />
+            )}
             <div className="p-6">
               <div className="flex justify-between items-start mb-4">
                 <h3 className="text-xl font-semibold text-gray-800">{skill.name}</h3>
@@ -95,6 +98,12 @@ const SkillList = () => {
                 </span>
               </div>
               <div className="flex justify-end space-x-2 pt-4 border-t">
+                <Link
+                  to={`/app/skills/${skill.id}`}
+                  className="text-blue-600 hover:text-blue-800 font-medium px-3 py-1 rounded-md hover:bg-blue-50 transition-colors duration-200"
+                >
+                  View Details
+                </Link>
                 <Link
                   to={`/app/skills/edit/${skill.id}`}
                   className="text-blue-600 hover:text-blue-800 font-medium px-3 py-1 rounded-md hover:bg-blue-50 transition-colors duration-200"
