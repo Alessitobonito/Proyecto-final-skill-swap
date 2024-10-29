@@ -1,158 +1,184 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { getUserProfile, updateUserProfile } from '../services/api';
-import { storage } from '../firebase';
+import { auth, db, storage } from '../firebase';
+import { updateProfile } from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import Swal from 'sweetalert2';
 
 const UserProfile = () => {
-  const { user } = useAuth();
-  const [profile, setProfile] = useState({
+  const [formData, setFormData] = useState({
     displayName: '',
-    bio: '',
-    location: '',
-    avatarUrl: '',
-    interests: ''
+    email: '',
+    bio: ''
   });
-  const [file, setFile] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [photoURL, setPhotoURL] = useState('');
 
   useEffect(() => {
-    if (user) {
-      loadUserProfile();
-    }
-  }, [user]);
+    const loadUserProfile = async () => {
+      if (auth.currentUser) {
+        // Cargar datos del perfil de autenticación
+        setFormData(prevState => ({
+          ...prevState,
+          displayName: auth.currentUser.displayName || '',
+          email: auth.currentUser.email || '',
+        }));
+        setPhotoURL(auth.currentUser.photoURL || '');
 
-  const loadUserProfile = async () => {
-    try {
-      const userProfile = await getUserProfile(user.uid);
-      if (userProfile) {
-        setProfile(userProfile);
+        // Cargar datos adicionales desde Firestore
+        try {
+          const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setFormData(prevState => ({
+              ...prevState,
+              bio: userData.bio || '',
+            }));
+          }
+        } catch (error) {
+          console.error('Error loading user data:', error);
+        }
       }
-    } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to load profile'
-      });
+    };
+
+    loadUserProfile();
+  }, []);
+
+  const handleFileChange = (e) => {
+    if (e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
     }
   };
 
   const handleChange = (e) => {
-    setProfile({ ...profile, [e.target.name]: e.target.value });
-  };
-
-  const handleFileChange = (e) => {
-    if (e.target.files[0]) {
-      setFile(e.target.files[0]);
-    }
+    const { name, value } = e.target;
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+
     try {
-      let avatarUrl = profile.avatarUrl;
-      if (file) {
-        const storageRef = ref(storage, `avatars/${user.uid}/${file.name}`);
-        await uploadBytes(storageRef, file);
-        avatarUrl = await getDownloadURL(storageRef);
+      const user = auth.currentUser;
+      if (!user) throw new Error('No user logged in');
+
+      let updateData = {
+        displayName: formData.displayName
+      };
+
+      // Si hay una nueva imagen, súbela primero
+      if (selectedFile) {
+        const storageRef = ref(storage, `avatars/${user.uid}/${Date.now()}_${selectedFile.name}`);
+        await uploadBytes(storageRef, selectedFile);
+        const photoURL = await getDownloadURL(storageRef);
+        updateData.photoURL = photoURL;
+        setPhotoURL(photoURL);
       }
 
-      await updateUserProfile(user.uid, { ...profile, avatarUrl });
-      
-      await Swal.fire({
+      // Actualizar el perfil de autenticación
+      await updateProfile(user, updateData);
+
+      // Actualizar o crear el documento del usuario en Firestore
+      const userRef = doc(db, 'users', user.uid);
+      await setDoc(userRef, {
+        displayName: formData.displayName,
+        bio: formData.bio,
+        photoURL: updateData.photoURL || user.photoURL,
+        email: user.email,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+
+      Swal.fire({
         icon: 'success',
-        title: 'Success',
-        text: 'Profile updated successfully!'
+        title: 'Profile Updated',
+        text: 'Your profile has been updated successfully!'
       });
     } catch (error) {
-      await Swal.fire({
+      console.error('Error updating profile:', error);
+      Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Failed to update profile'
+        text: 'Failed to update profile. Please try again.'
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-6">User Profile</h2>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
+    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
+      <h2 className="text-2xl font-bold mb-6 text-center">User Profile</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2">
             Profile Picture
           </label>
-          {profile.avatarUrl && (
+          {photoURL && (
             <img
-              src={profile.avatarUrl}
+              src={photoURL}
               alt="Profile"
-              className="w-32 h-32 rounded-full mb-4 object-cover"
+              className="w-24 h-24 rounded-full mb-2 object-cover"
             />
           )}
           <input
             type="file"
             onChange={handleFileChange}
-            className="mt-1 block w-full"
+            accept="image/*"
+            className="w-full"
           />
         </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
+        
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2">
             Display Name
           </label>
           <input
             type="text"
             name="displayName"
-            value={profile.displayName}
+            value={formData.displayName}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500"
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2">
+            Email
+          </label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            disabled
+            className="w-full px-3 py-2 border rounded bg-gray-100"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2">
             Bio
           </label>
           <textarea
             name="bio"
-            value={profile.bio}
+            value={formData.bio}
             onChange={handleChange}
+            className="w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500"
             rows="4"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Location
-          </label>
-          <input
-            type="text"
-            name="location"
-            value={profile.location}
-            onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Interests
-          </label>
-          <input
-            type="text"
-            name="interests"
-            value={profile.interests}
-            onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            placeholder="Separate interests with commas"
           />
         </div>
 
         <button
           type="submit"
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          disabled={isLoading}
+          className={`w-full bg-blue-500 text-white font-bold py-2 px-4 rounded 
+            ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}
         >
-          Save Profile
+          {isLoading ? 'Updating...' : 'Update Profile'}
         </button>
       </form>
     </div>
