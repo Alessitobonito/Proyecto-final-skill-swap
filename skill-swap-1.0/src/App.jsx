@@ -11,8 +11,8 @@ import SkillDetails from './pages/SkillDetails';
 import UserProfile from './pages/UserProfile';
 import FindSkills from './pages/FindSkills';
 import PublicUserProfile from './pages/PublicUserProfile';
-import ChatComponent from './components/ChatComponent';
-import ConversationsPage from './pages/ConversationsPage';
+import ChatList from './components/ChatList';
+import ChatRoom from './components/ChatRoom';
 
 function App() {
   return (
@@ -30,8 +30,8 @@ function App() {
           <Route path="skills/:id" element={<SkillDetails />} />
           <Route path="profile" element={<UserProfile />} />
           <Route path="user/:userId" element={<PublicUserProfile />} />
-          <Route path="conversations" element={<ConversationsPage />} />
-          <Route path="chat/:recipientId/:recipientName" element={<ChatComponent />} />
+          <Route path="chats" element={<ChatList />} />
+          <Route path="chat/:recipientId/:recipientName" element={<ChatRoom />} />
         </Route>
       </Routes>
     </Layout>
