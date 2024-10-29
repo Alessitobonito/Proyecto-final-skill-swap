@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getSkill, saveSkill } from '../services/api';
-import { auth, storage } from '../firebase';
+import { storage } from '../firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import Swal from 'sweetalert2';
 import { useAuth } from '../contexts/AuthContext'; 
@@ -19,6 +19,7 @@ const SkillForm = () => {
   });
   const [file, setFile] = useState(null);
   const navigate = useNavigate();
+  const [customCategory, setCustomCategory] = useState('');
   const { user } = useAuth(); 
 
   useEffect(() => {
@@ -37,7 +38,19 @@ const SkillForm = () => {
   }, [id, user]);
 
   const handleChange = (e) => {
-    setSkill({ ...skill, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === 'category') {
+      if (value === 'other') {
+        setSkill({ ...skill, category: 'other' });
+      } else {
+        setSkill({ ...skill, category: value });
+        setCustomCategory('');
+      }
+    } else if (name === 'customCategory') {
+      setCustomCategory(value);
+    } else {
+      setSkill({ ...skill, [name]: value });
+    }
   };
 
   const handleFileChange = (e) => {
@@ -182,7 +195,7 @@ const SkillForm = () => {
               type="text"
               name="customCategory"
               value={customCategory}
-              onChange={(e) => setCustomCategory(e.target.value)}
+              onChange={handleChange}
               className="w-full px-4 py-2 border rounded focus:outline-none focus:border-blue-500"
               id="customCategory"
               placeholder="Keep it simple, that way it'll be easy to be found!"

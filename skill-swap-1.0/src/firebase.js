@@ -15,7 +15,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Configurar la persistencia a nivel de sesión
 setPersistence(auth, browserSessionPersistence)
   .then(() => {
     console.log('Persistence set to browserSession');
