@@ -10,6 +10,7 @@ const Menu = () => {
           <li><Link to="/app/skills" className="hover:text-blue-600">My Skills</Link></li>
           <li><Link to="/app/find-skills" className="hover:text-blue-600">Find Skills</Link></li>
           <li><Link to="/app/profile" className="hover:text-blue-600">My Profile</Link></li>
+          <li><Link to="/app/chats" className="hover:text-blue-600">My Chats</Link></li>
         </ul>
       </div>
     </nav>

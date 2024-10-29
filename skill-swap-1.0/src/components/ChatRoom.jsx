@@ -49,53 +49,59 @@ const ChatRoom = () => {
 
     const chatRef = doc(db, 'chats', chat.id);
     try {
-      await updateDoc(chatRef, {
-        messages: arrayUnion({
-          senderId: user.uid,
-          recipientId: recipientId,
-          text: text,
-          timestamp: serverTimestamp()
-        }),
-        lastTimestamp: serverTimestamp()
-      });
+        const now = new Date(); // Asegúrate de que esta línea esté presente
+        await updateDoc(chatRef, {
+            messages: arrayUnion({
+                senderId: user.uid,
+                recipientId: recipientId,
+                text: text,
+                timestamp: now.toISOString(), // Aquí se utiliza `now`
+                timestampNumeric: now.getTime() // Añade esto para facilitar el ordenamiento
+            }),
+            lastTimestamp: serverTimestamp()
+        });
     } catch (error) {
-      console.error("Error sending message:", error);
+        console.error("Error sending message:", error);
     }
-  };
+};
 
   if (!chat) {
     return <div>Loading...</div>;
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="bg-white shadow-sm p-4">
-        <h2 className="text-xl font-semibold">Chat with {decodeURIComponent(recipientName)}</h2>
+    <div className="flex flex-col h-[calc(100vh-4rem)]">
+      <div className="bg-white shadow-sm p-4 flex items-center">
+        <h2 className="text-xl font-semibold">{decodeURIComponent(recipientName)}</h2>
       </div>
       
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
         {chat.messages && chat.messages.map((message, index) => (
           <div
             key={index}
             className={`flex ${message.senderId === user.uid ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[70%] p-3 rounded-lg ${
+              className={`max-w-[70%] p-3 rounded-lg shadow-sm ${
                 message.senderId === user.uid
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-800'
+                  ? 'bg-blue-500 text-white ml-auto'
+                  : 'bg-white text-gray-800'
               }`}
             >
-              <p>{message.text}</p>
-              <span className="text-xs opacity-75">
-                {message.timestamp?.toDate().toLocaleTimeString()}
+              <p className="break-words">{message.text}</p>
+              <span className="text-xs opacity-75 block mt-1">
+                {message.timestamp
+                  ? new Date(message.timestamp).toLocaleTimeString()
+                  : ''}
               </span>
             </div>
           </div>
         ))}
       </div>
-
-      <ChatInput onSendMessage={sendMessage} />
+  
+      <div className="bg-white border-t p-4">
+        <ChatInput onSendMessage={sendMessage} />
+      </div>
     </div>
   );
 };

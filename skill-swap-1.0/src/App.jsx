@@ -39,3 +39,14 @@ function App() {
 }
 
 export default App;
+/*Página de detalles de habilidad X
+Perfil de usuario X
+Configuraciones de la cuenta
+Sistema de búsqueda y filtrado X
+Sistema de calificaciones y reseñas 
+Integración de redes sociales
+Notificaciones
+Sistema de mensajería X
+Funcionalidad de emparejamiento
+Analíticas y métricas
+Página de administración*/
