@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
@@ -9,6 +9,20 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      console.log('Auth state changed:', {
+        timestamp: new Date().toISOString(),
+        user: user ? {
+          uid: user.uid,
+          email: user.email
+        } : null,
+        tabId: Math.random().toString(36).substr(2, 9) // ID único para identificar cada pestaña
+      });
+    });
+  
+    return () => unsubscribe();
+  }, []);
 
   const Toast = Swal.mixin({
     toast: true,

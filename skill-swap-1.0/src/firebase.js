@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, setPersistence, browserSessionPersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
@@ -13,7 +13,18 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+const auth = getAuth(app);
+
+// Configurar la persistencia a nivel de sesión
+setPersistence(auth, browserSessionPersistence)
+  .then(() => {
+    console.log('Persistence set to browserSession');
+  })
+  .catch((error) => {
+    console.error('Error setting persistence:', error);
+  });
+
+export { auth };
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 

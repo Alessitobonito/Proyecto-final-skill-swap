@@ -56,3 +56,12 @@ export const updateUserProfile = async (userId, profileData) => {
   await setDoc(docRef, profileData, { merge: true });
   return profileData;
 };
+export const getAllSkills = async (currentUserId) => {
+  const skillsCollection = collection(db, SKILLS_COLLECTION);
+  const q = query(skillsCollection, where("userId", "!=", currentUserId));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => {
+    const data = doc.data();
+    return { id: doc.id, ...data };
+  });
+};
