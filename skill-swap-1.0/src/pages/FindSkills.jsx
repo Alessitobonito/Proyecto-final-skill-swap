@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getAllSkills } from '../services/api';
 import { CATEGORIES } from '../utils/categories';
 import { useAuth } from '../contexts/AuthContext'; 
+import { Link, useNavigate } from 'react-router-dom';
 
 const FindSkills = () => {
     const [skills, setSkills] = useState([]);
@@ -9,7 +10,8 @@ const FindSkills = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategories, setSelectedCategories] = useState([]);
     const { user } = useAuth();
-  
+    const navigate = useNavigate();
+
     useEffect(() => {
       if (user) {
         fetchAllSkills();
@@ -21,9 +23,14 @@ const FindSkills = () => {
     }, [searchTerm, selectedCategories, skills]);
   
     const fetchAllSkills = async () => {
-      const fetchedSkills = await getAllSkills(user.uid);
-      setSkills(fetchedSkills);
-      setFilteredSkills(fetchedSkills);
+      try {
+        const fetchedSkills = await getAllSkills(user.uid);
+        setSkills(fetchedSkills);
+        setFilteredSkills(fetchedSkills);
+      } catch (error) {
+        console.error("Error fetching skills:", error);
+        // Aquí podrías mostrar un mensaje de error al usuario
+      }
     };
 
     const handleSearchChange = (e) => {
@@ -131,6 +138,20 @@ const FindSkills = () => {
                   <span className="text-sm text-gray-500">
                     by {skill.userName}
                   </span>
+                </div>
+                <div className="mt-4">
+                  <Link 
+                    to={`/app/chat/${skill.userId}/${encodeURIComponent(skill.userName)}`}
+                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300">
+                    Chat with {skill.userName}
+                  </Link>
+                </div>
+                <div className='mt-4'>
+                  <Link 
+                    to={`/app/user/${skill.userId}`} 
+                    className="text-blue-500 hover:underline">
+                    View {skill.userName}'s Profile
+                  </Link>
                 </div>
               </div>
             </div>
