@@ -18,15 +18,12 @@ const UserProfile = () => {
   useEffect(() => {
     const loadUserProfile = async () => {
       if (auth.currentUser) {
-        // Cargar datos del perfil de autenticación
         setFormData(prevState => ({
           ...prevState,
           displayName: auth.currentUser.displayName || '',
           email: auth.currentUser.email || '',
         }));
         setPhotoURL(auth.currentUser.photoURL || '');
-
-        // Cargar datos adicionales desde Firestore
         try {
           const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
           if (userDoc.exists()) {
@@ -71,7 +68,6 @@ const UserProfile = () => {
         displayName: formData.displayName
       };
 
-      // Si hay una nueva imagen, súbela primero
       if (selectedFile) {
         const storageRef = ref(storage, `avatars/${user.uid}/${Date.now()}_${selectedFile.name}`);
         await uploadBytes(storageRef, selectedFile);
@@ -80,10 +76,8 @@ const UserProfile = () => {
         setPhotoURL(photoURL);
       }
 
-      // Actualizar el perfil de autenticación
       await updateProfile(user, updateData);
 
-      // Actualizar o crear el documento del usuario en Firestore
       const userRef = doc(db, 'users', user.uid);
       await setDoc(userRef, {
         displayName: formData.displayName,

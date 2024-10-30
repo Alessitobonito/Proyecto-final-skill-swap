@@ -16,11 +16,9 @@ const ChatRoom = () => {
     const chatId = [user.uid, recipientId].sort().join('_');
     const chatRef = doc(db, 'chats', chatId);
 
-    // Primero verificamos si el chat existe
     const initializeChat = async () => {
       const chatDoc = await getDoc(chatRef);
       if (!chatDoc.exists()) {
-        // Si no existe, lo creamos
         await setDoc(chatRef, {
           participants: [user.uid, recipientId],
           messages: [],
@@ -32,7 +30,6 @@ const ChatRoom = () => {
 
     initializeChat();
 
-    // Luego establecemos el listener
     const unsubscribe = onSnapshot(chatRef, (docSnapshot) => {
       if (docSnapshot.exists()) {
         setChat({ id: docSnapshot.id, ...docSnapshot.data() });
@@ -49,14 +46,14 @@ const ChatRoom = () => {
 
     const chatRef = doc(db, 'chats', chat.id);
     try {
-        const now = new Date(); // Asegúrate de que esta línea esté presente
+        const now = new Date(); 
         await updateDoc(chatRef, {
             messages: arrayUnion({
                 senderId: user.uid,
                 recipientId: recipientId,
                 text: text,
-                timestamp: now.toISOString(), // Aquí se utiliza `now`
-                timestampNumeric: now.getTime() // Añade esto para facilitar el ordenamiento
+                timestamp: now.toISOString(), 
+                timestampNumeric: now.getTime() 
             }),
             lastTimestamp: serverTimestamp()
         });

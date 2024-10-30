@@ -29,7 +29,6 @@ const FindSkills = () => {
         setFilteredSkills(fetchedSkills);
       } catch (error) {
         console.error("Error fetching skills:", error);
-        // Aquí podrías mostrar un mensaje de error al usuario
       }
     };
 
