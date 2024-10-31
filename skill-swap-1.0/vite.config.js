@@ -6,7 +6,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     optimizeDeps: {
-      include: [] // Puedes dejar esto vacío para desactivar optimizaciones
+      include: [] 
     }
   },
 });

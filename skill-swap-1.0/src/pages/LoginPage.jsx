@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import Swal from 'sweetalert2';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
