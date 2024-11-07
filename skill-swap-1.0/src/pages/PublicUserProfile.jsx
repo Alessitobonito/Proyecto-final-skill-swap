@@ -4,6 +4,7 @@ import { doc, getDoc, collection, addDoc, query, where, getDocs } from 'firebase
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import Swal from 'sweetalert2';
+import { getSkills } from '../services/api'; // Asegúrate de importar la función para obtener habilidades
 
 const PublicUserProfile = () => {
   const { userId } = useParams();
@@ -14,6 +15,7 @@ const PublicUserProfile = () => {
     rating: 5,
     comment: ''
   });
+  const [skills, setSkills] = useState([]); // Estado para habilidades
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -29,7 +31,7 @@ const PublicUserProfile = () => {
         collection(db, 'reviews'),
         where('receiverId', '==', userId)
       );
-      const reviewsSnapshot = await getDocs(reviewsQuery);
+ const reviewsSnapshot = await getDocs(reviewsQuery);
       const reviewsList = await Promise.all(reviewsSnapshot.docs.map(async (reviewDoc) => {
         const data = reviewDoc.data();
         const reviewerDoc = await getDoc(doc(db, 'users', data.reviewerId));
@@ -44,8 +46,14 @@ const PublicUserProfile = () => {
       setReviews(reviewsList);
     };
 
+    const fetchSkills = async () => {
+      const userSkills = await getSkills(userId); // Obtener habilidades del usuario
+      setSkills(userSkills);
+    };
+
     fetchUserProfile();
     fetchReviews();
+    fetchSkills(); // Llama a la función para obtener habilidades
   }, [userId]);
 
   const handleReviewSubmit = async (e) => {
@@ -95,18 +103,18 @@ const PublicUserProfile = () => {
         collection(db, 'reviews'),
         where('receiverId', '==', userId)
       );
-    const reviewsSnapshot = await getDocs(reviewsQuery);
-    const updatedReviews = await Promise.all(reviewsSnapshot.docs.map(async (reviewDoc) => {
-      const data = reviewDoc.data();
-      const reviewerDoc = await getDoc(doc(db, 'users', data.reviewerId));
-      const reviewerData = reviewerDoc.data();
-      return {
-        id: reviewDoc.id,
-        ...data,
-        reviewerName: reviewerData?.displayName || 'Anonymous',
-        reviewerPhoto: reviewerData?.photoURL
-      };
-    }));
+      const reviewsSnapshot = await getDocs(reviewsQuery);
+      const updatedReviews = await Promise.all(reviewsSnapshot.docs.map(async (reviewDoc) => {
+        const data = reviewDoc.data();
+        const reviewerDoc = await getDoc(doc(db, 'users', data.reviewerId));
+        const reviewerData = reviewerDoc.data();
+        return {
+          id: reviewDoc.id,
+          ...data,
+          reviewerName: reviewerData?.displayName || 'Anonymous',
+          reviewerPhoto: reviewerData?.photoURL
+        };
+      }));
       setReviews(updatedReviews);
 
     } catch (error) {
@@ -137,13 +145,23 @@ const PublicUserProfile = () => {
           />
         )}
         <p className="text-gray-600 mb-4">{userProfile.bio}</p>
+        
         <h2 className="text-xl font-semibold mb-2">Skills</h2>
-        {/*listar las habilidades del usuario */}
+        <ul className="list-disc list-inside mb-4">
+          {skills.length > 0 ? (
+            skills.map(skill => (
+              <li key={skill.id} className="text-gray-800">{skill.name} - {skill.level}</li>
+            ))
+          ) : (
+            <li className="text-gray-500">No skills listed.</li>
+          )}
+        </ul>
+
         <Link 
-            to={`/app/chat/${userId}/${encodeURIComponent(userProfile.displayName)}`}
-            className="bg-blue-500 text-white px-4 py-2 rounded mt-4 inline-block hover:bg-blue-600 transition duration-300"
-            >
-            Chat with {userProfile.displayName}
+          to={`/app/chat/${userId}/${encodeURIComponent(userProfile.displayName)}`}
+          className="bg-blue-500 text-white px-4 py-2 rounded mt-4 inline-block hover:bg-blue-600 transition duration-300"
+        >
+          Chat with {userProfile.displayName}
         </Link>
       </div>
 
@@ -201,7 +219,7 @@ const PublicUserProfile = () => {
           {reviews.length > 0 ? (
             reviews.map((review) => (
               <div key={review.id} className="border-b pb-4">
-                <div className="flex items center mb-2">
+                <div className="flex items-center mb-2">
                   {review.reviewerPhoto && <img
                       src={review.reviewerPhoto}
                       alt={review.reviewerName}
