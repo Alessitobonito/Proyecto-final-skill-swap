@@ -43,7 +43,7 @@ export default App;
 Perfil de usuario X
 Configuraciones de la cuenta
 Sistema de búsqueda y filtrado X
-Sistema de calificaciones y reseñas 
+Sistema de calificaciones y reseñas X
 Integración de redes sociales
 Notificaciones
 Sistema de mensajería X
