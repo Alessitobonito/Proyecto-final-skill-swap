@@ -1,7 +1,7 @@
 [build]
   base = "skill-swap-1.0/"
   command = "npm run build"
-  publish = "skill-swap-1.0/dist"
+  publish = "dist"
 
 [[redirects]]
   from = "/*"
