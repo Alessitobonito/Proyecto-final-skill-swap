@@ -21,7 +21,7 @@ const ChatRoom = () => {
       if (!chatDoc.exists()) {
         await setDoc(chatRef, {
           participants: [user.uid, recipientId],
-          messages: [],
+          messages: [], // Asegúrate de que sea un array vacío inicialmente
           lastTimestamp: serverTimestamp(),
           createdAt: serverTimestamp()
         });

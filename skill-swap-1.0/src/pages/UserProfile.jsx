@@ -83,9 +83,9 @@ const UserProfile = () => {
       const userRef = doc(db, 'users', user.uid);
       await setDoc(userRef, {
         displayName: formData.displayName,
-        bio: formData.bio,
+        email: user.email, // Asegúrate de incluir el email
+        bio: formData.bio || '', // Opcional, con un valor por defecto
         photoURL: updateData.photoURL || user.photoURL,
-        email: user.email,
         updatedAt: new Date().toISOString()
       }, { merge: true });
 
