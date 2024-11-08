@@ -7,6 +7,7 @@ export default defineConfig({
     outDir: 'dist',
     optimizeDeps: {
       include: [] 
-    }
+    },
+    base: '/',
   },
 });
