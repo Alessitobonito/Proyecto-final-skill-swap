@@ -4,8 +4,10 @@ import { updateProfile } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import Swal from 'sweetalert2';
+import { useAuth } from '../contexts/AuthContext';
 
 const UserProfile = () => {
+  const { logout } = useAuth();
   const [formData, setFormData] = useState({
     displayName: '',
     email: '',
@@ -104,6 +106,30 @@ const UserProfile = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      const result = await Swal.fire({
+        title: 'Are you sure you want to logout?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, logout'
+      });
+
+      if (result.isConfirmed) {
+        await logout();
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Logout Failed',
+        text: 'There was an error logging out. Please try again.'
+      });
+    }
+  };
+
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
       <h2 className="text-2xl font-bold mb-6 text-center">User Profile</h2>
@@ -175,6 +201,15 @@ const UserProfile = () => {
           {isLoading ? 'Updating...' : 'Update Profile'}
         </button>
       </form>
+
+      <div className="mt-4">
+        <button
+          onClick={handleLogout}
+          className="w-full bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-red-600 transition duration-300"
+        >
+          Logout
+        </button>
+      </div>
     </div>
   );
 };
